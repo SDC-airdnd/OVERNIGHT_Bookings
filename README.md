@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Airbnb-booking
 
 > Airbnb Booking module
@@ -79,3 +80,7 @@ npm react-dev
 npm run seed
 ```
 
+=======
+# airdnd-booking
+Doty - SDC - Airdnd Booking Module
+>>>>>>> 5174a27acf80f4d43c17e120e8fdf55b69b227d5
