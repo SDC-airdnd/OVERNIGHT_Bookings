@@ -1,0 +1,21 @@
+version: '2.1'
+
+services:
+  booking:
+    build: ./
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - '3333:3333'
+
+  database:
+    build: ./booking
+    environment:
+      MYSQL_ROOT_PASSWORD: 'yerin'
+      MYSQL_DATABASE: 'booking'
+    healthcheck:
+      test: ['CMD', "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+ 
