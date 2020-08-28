@@ -4,6 +4,7 @@ const db = require('./index.js');
 const fs = require('fs');
 const csv = require ('fast-csv');
 const ws = fs.createWriteStream('bookingData.csv');
+const writeBookings = fs.createWriteStream('bookingstreamer.json');
 
 
 const bookings = [];
@@ -45,10 +46,9 @@ function isNotOverlapWithOtherBookingDates(roomId, startDate, endDate) {
   return true;
 }
 
-function randomCheckInOutOnRoom(roomList, roomId) {
-  const room = roomList[`${roomId}`];
-  let startDate = moment(randomDate(moment().toDate(), moment().add(2, 'months').toDate())).startOf('day').toDate();
-  let endDate = moment(startDate).add(randomIntFromInterval(room.min_night, room.max_night), 'days').startOf('day').toDate();
+function randomCheckInOutOnRoom(roomId) {
+  let startDate = moment(randomDate(moment().toDate(), moment().add(2, 'months').toDate())).startOf('day').utc().format();
+  let endDate = moment(startDate).add(randomIntFromInterval(1, 5), 'days').startOf('day').utc().format();
   let trial = 0;
 
   while (!isNotOverlapWithOtherBookingDates(roomId, startDate, endDate)) {
@@ -56,8 +56,8 @@ function randomCheckInOutOnRoom(roomList, roomId) {
     if (trial > 1) {
       return null;
     }
-    startDate = moment(randomDate(moment().toDate(), moment().add(2, 'months').toDate())).startOf('day').toDate();
-    endDate = moment(startDate).add(randomIntFromInterval(room.min_night, room.max_night), 'days').startOf('day').toDate();
+    startDate = moment(randomDate(moment().toDate(), moment().add(2, 'months').toDate())).startOf('day').utc().format();
+    endDate = moment(startDate).add(randomIntFromInterval(1, 5), 'days').startOf('day').utc().format();
   }
 
   return {
@@ -67,11 +67,10 @@ function randomCheckInOutOnRoom(roomList, roomId) {
 }
 
 // Random Bookings
-function generateRandomBooking(roomList) {
-  const roomId = randomIntFromInterval(0, roomList.length - 1);
-  const room = roomList[roomId];
+function generateRandomBooking() {
+  const roomId = randomIntFromInterval(1, 10000000);
 
-  const randomCheckInOutDates = randomCheckInOutOnRoom(roomList, roomId);
+  const randomCheckInOutDates = randomCheckInOutOnRoom(roomId);
 
   if (randomCheckInOutDates === null) {
     return null;
@@ -81,54 +80,55 @@ function generateRandomBooking(roomList) {
     roomId,
     email: faker.internet.email(),
     guests: {
-      adults: randomIntFromInterval(1, JSON.parse(room.max_guest).adults),
-      children: randomIntFromInterval(0, JSON.parse(room.max_guest).children),
-      infants: randomIntFromInterval(0, JSON.parse(room.max_guest).infants),
+      adults: randomIntFromInterval(1, 5),
+      children: randomIntFromInterval(0, 5),
+      infants: randomIntFromInterval(0, 5),
     },
     check_in: randomCheckInOutDates.check_in,
     check_out: randomCheckInOutDates.check_out,
-    createdAt: moment(randomCheckInOutDates.check_in).subtract(randomIntFromInterval(0, 30), 'days').toDate(),
+    createdAt: moment(randomCheckInOutDates.check_in).subtract(randomIntFromInterval(0, 30), 'days').utc().format(),
   };
   return booking;
 }
 
-function generateRandomBookings(num, roomList) {
-  let book;
-  for (let i = 0; i < num; i += 1) {
-    book = generateRandomBooking(roomList);
-    // console.log(book);
-    if (book !== null) {
-      bookings.push(book);
-      if (bookingsByRoom[`${book.roomId}`] === undefined) {
-        bookingsByRoom[`${book.roomId}`] = [];
+    function write10M(writer, encoding, callback) {
+
+      let i = 10000000;
+      let id = 0;
+      function write() {
+        let ok = true;
+        do {
+          i-= 1;
+          id += 1;
+
+          const data = JSON.stringify(generateRandomBooking())
+
+          if (i === 0) {
+            writer.write(data, encoding, callback);
+          } else {
+            // See if we should continue, or wait.
+            // Don't pass the callback, because we're not done yet.
+            ok = writer.write(data, encoding);
+          }
+        } while (i > 0 && ok);
+        if (i > 0) {
+          // Had to stop early!
+          // Write some more once it drains.
+          writer.once('drain', write);
+        }
       }
-      bookingsByRoom[`${book.roomId}`].push(book);
-    }
-  }
-}
-
-function createBookingData(num) {
-  db.Room.findAll().then((rooms) => {
-    generateRandomBookings(num, rooms);
-
-    for (let i = 0; i < bookings.length; i += 1) {
-      bookings[i].guests = JSON.stringify(bookings[i].guests);
-      bookings[i].roomId += 1;
+      write();
     }
 
-    bookings.forEach((data) => {
-      db.Booking.create(data)
-        .then(() => {
-          // eslint-disable-next-line no-console
-          console.log('success for booking');
-        })
-        .catch((err) => {
-          throw err;
-        });
+    write10M(writeBookings, 'utf-8', () => {
+      writeBookings.end();
     });
-  });
-}
-csv
-  .write((createBookingData(50)), {headers: true})
-  .pipe(ws);
+
+
+
+
+
+
+
+
 

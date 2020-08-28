@@ -1,5 +1,7 @@
 node_modules
 
-roomData.csv
+*.csv
+
+db/bookingstreamer.json
 
 coverage/

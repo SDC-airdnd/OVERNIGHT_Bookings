@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('booking', 'root', null, {
+const sequelize = new Sequelize('sdc_database', 'michaeldoty', 'password', {
   host: 'localhost',
-  dialect: 'mysql',
+  dialect: 'postgres',
 });
 
 
