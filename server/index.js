@@ -2,14 +2,54 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('../db/index.js');
+const NodeCouchDb = require('node-couchdb');
 
+const couch = new NodeCouchDb({
+  auth: {
+    user: 'admin',
+    password: 'password'
+  }
+});
+
+couch.listDatabases().then(function(dbs) {
+  console.log(dbs);
+});
+
+const dbName = 'sdc_database'
+const viewUrl = '_design/roombooking/_view/roomBookingData'
+
+const mangoQuery = {
+  selector: {
+    roomId: {
+      $eq:'2663123'}
+  }
+};
+
+const parameters = {};
 
 const app = express();
 const port = 3333;
-app.use(express.static(path.join(__dirname, '../public/dist')));
+//app.use(express.static(path.join(__dirname, '../public/dbtest')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(bodyParser.json());
 app.use(cors());
+
+app.get('/', (req, res) => {
+
+  couch.mango(dbName, mangoQuery, parameters).then(
+    function(data, headers, status) {
+      console.log(data.data.docs)
+      res.render('index', {
+        bookingInfo:data.data.docs
+      });
+        });
+    },
+    function(err) {
+      res.send(err);
+    }
+  );
 
 // app.get('*.js', (req, res, next) => {
 //   req.url = `${req.url}.gz`;
