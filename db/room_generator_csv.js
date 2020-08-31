@@ -1,8 +1,9 @@
 const faker = require('faker');
-const db = require('./index.js');
+//const db = require('./index.js');
 const fs = require('fs');
 const csv = require ('fast-csv');
 const ws = fs.createWriteStream('roomData.csv');
+const writeBookings = fs.createWriteStream('bookingstreamer10M.json');
 
 const roomNameAppendix = ['\'s Apartment', '\'s House', '\'s Loft', '\'s Condo'];
 
@@ -24,12 +25,12 @@ function randomIntFromInterval(min, max) {
 }
 
 const rooms = [];
-
+var id = 0;
 // Random Rooms
-function generateRandomRooms(num) {
-  for (let i = 1; i < num + 1; i += 1) {
+function generateRandomRooms() {
+
     const room = {
-      id: i,
+      id: id,
       roomname: faker.name.findName()
       + roomNameAppendix[randomIntFromInterval(0, roomNameAppendix.length - 1)],
       price: randomIntFromInterval(50, 200),
@@ -46,23 +47,47 @@ function generateRandomRooms(num) {
       ratings: (Math.random() * (5.0 - 1.0) + 1.0).toFixed(1),
       num_reviews: randomIntFromInterval(0, 100),
     };
-    rooms.push(room);
-  }
+
+    rooms.max_guest = JSON.stringify(rooms.max_guest);
+
+    id++;
+
+    return room;
 }
 
-generateRandomRooms(10000000);
+function write10M(writer, encoding, callback) {
 
-const createRoomData = () => {
-  for (let i = 0; i < rooms.length; i += 1) {
-    rooms[i].max_guest = JSON.stringify(rooms[i].max_guest);
+  let i = 10000000;
+  let id = 0;
+  function write() {
+    let ok = true;
+    do {
+      i-= 1;
+      id += 1;
+
+      const data = JSON.stringify(generateRandomRooms(1))
+
+      if (i === 0) {
+        writer.write(data, encoding, callback);
+      } else {
+        // See if we should continue, or wait.
+        // Don't pass the callback, because we're not done yet.
+        ok = writer.write(data, encoding);
+      }
+    } while (i > 0 && ok);
+    if (i > 0) {
+      // Had to stop early!
+      // Write some more once it drains.
+      writer.once('drain', write);
+    }
   }
+  write();
+}
 
-  csv
-  .write(rooms, {header: true})
-  .pipe(ws)
-};
+write10M(writeBookings, 'utf-8', () => {
+  writeBookings.end();
+});
 
-createRoomData();
 
 module.exports = {
   rooms,
