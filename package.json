@@ -8,7 +8,7 @@
     "start": "nodemon server/index.js",
     "build": "webpack --config webpack.config.prod.js",
     "react-dev": "webpack -d --watch",
-    "seed": "mysql -u root <db/schema.sql && node db/room_generater.js && node db/booking_generater.js",
+    "room": "node db/room_generater.js",
     "bookings": "db/booking_generater.js"
   },
   "lint-staged": {

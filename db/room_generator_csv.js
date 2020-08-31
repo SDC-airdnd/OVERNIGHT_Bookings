@@ -1,8 +1,8 @@
 const faker = require('faker');
-const db = require('./index.js');
+//const db = require('./index.js');
 const fs = require('fs');
 const csv = require ('fast-csv');
-const ws = fs.createWriteStream('roomData.csv');
+const ws = fs.createWriteStream('roomDataWithHeaders.csv');
 
 const roomNameAppendix = ['\'s Apartment', '\'s House', '\'s Loft', '\'s Condo'];
 
@@ -58,7 +58,7 @@ const createRoomData = () => {
   }
 
   csv
-  .write(rooms, {header: true})
+  .write(rooms, {headers: true})
   .pipe(ws)
 };
 
