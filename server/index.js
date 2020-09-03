@@ -22,7 +22,7 @@ const randomIntFromInterval = (min, max) => {
 }
 
 app.get('/test', (req, res) => {
-  let randoRoom = randomIntFromInterval(1,10000000);
+  let randoRoom = randomIntFromInterval(1, 10000000);
   console.log(randoRoom);
   db.Room.findAll({
     where: {
