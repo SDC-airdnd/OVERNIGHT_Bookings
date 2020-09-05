@@ -8,8 +8,8 @@
     "start": "nodemon server/index.js",
     "build": "webpack --config webpack.config.prod.js",
     "react-dev": "webpack -d --watch",
-    "seed": "mysql -u root <db/schema.sql && node db/room_generater.js && node db/booking_generater.js",
-    "bookings": "db/booking_generater.js"
+    "seed": "mysql -u root <db/schema.sql && node db/room_generater.js",
+    "seed-rooms-bookings": "node db/room_generator_cvs.js && node db/booking_generator_cvs.js"
   },
   "lint-staged": {
     "*.js": [
@@ -37,20 +37,28 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "csv-stream": "^0.2.0",
+    "csv-write-stream": "^2.0.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",
     "express": "^4.17.1",
     "faker": "^4.1.0",
+    "fast-csv": "^4.3.1",
+    "fs": "0.0.1-security",
     "jest": "^24.9.0",
     "jquery": "^3.5.1",
     "moment": "^2.27.0",
     "mysql": "^2.18.1",
     "mysql2": "^1.7.0",
+    "newrelic": "^6.13.0",
     "nodemon": "^1.19.4",
+    "pg": "^8.3.3",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "sequelize": "^5.22.3"
+    "request": "^2.88.2",
+    "sequelize": "^5.22.3",
+    "stream": "0.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.11.4",
@@ -69,6 +77,7 @@
     "husky": "^2.7.0",
     "identity-obj-proxy": "^3.0.0",
     "jest-cli": "^24.9.0",
+    "json2csv": "^5.0.1",
     "lint-staged": "^8.2.1",
     "pre-commit": "^1.2.2",
     "react-test-renderer": "^16.13.1",

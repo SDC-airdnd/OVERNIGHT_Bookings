@@ -1,0 +1,9 @@
+node_modules
+
+*.csv
+
+db/bookingstreamer.json
+
+coverage/
+
+.DS_Store

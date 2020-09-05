@@ -1,5 +1,8 @@
 const faker = require('faker');
 const db = require('./index.js');
+const fs = require('fs');
+const csv = require ('fast-csv');
+const ws = fs.createWriteStream('roomData.csv');
 
 const roomNameAppendix = ['\'s Apartment', '\'s House', '\'s Loft', '\'s Condo'];
 
@@ -20,12 +23,13 @@ function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const npm = [];
+const rooms = [];
 
 // Random Rooms
 function generateRandomRooms(num) {
-  for (let i = 0; i < num; i += 1) {
+  for (let i = 1; i < num + 1; i += 1) {
     const room = {
+      id: i,
       roomname: faker.name.findName()
       + roomNameAppendix[randomIntFromInterval(0, roomNameAppendix.length - 1)],
       price: randomIntFromInterval(50, 200),
@@ -46,24 +50,16 @@ function generateRandomRooms(num) {
   }
 }
 
-generateRandomRooms(100);
+generateRandomRooms(10000000);
 
 const createRoomData = () => {
   for (let i = 0; i < rooms.length; i += 1) {
     rooms[i].max_guest = JSON.stringify(rooms[i].max_guest);
   }
 
-
-  rooms.forEach(data => (
-    db.Room.create(data)
-      .then(() => {
-        // eslint-disable-next-line no-console
-        console.log('success');
-      })
-      .catch((err) => {
-        throw err;
-      })
-  ));
+  csv
+  .write(rooms, {header: true})
+  .pipe(ws)
 };
 
 createRoomData();

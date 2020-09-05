@@ -1,8 +1,10 @@
+require('newrelic');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('../db/index.js');
+
 
 
 const app = express();
@@ -16,6 +18,27 @@ app.use(cors());
 //   res.set('Content-Encoding', 'gzip');
 //   next();
 // });
+
+const randomIntFromInterval = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+app.get('/test', (req, res) => {
+  let randoRoom = randomIntFromInterval(1, 10000000);
+  db.Room.findAll({
+    where: {
+      id: randoRoom,
+    },
+  })
+    .then((result) => {
+      res.sendStatus(200);
+    })
+    .catch(() => {
+      res.sendStatus(500);
+    });
+})
+
+
 
 app.get('/room', (req, res) => {
   db.Room.findAll({
