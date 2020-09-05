@@ -1,8 +1,17 @@
 const Sequelize = require('sequelize');
+const { internet } = require('faker');
 
+// const sequelize = new Sequelize('sdc_database', 'admin', 'postpass', {
+//   host: 'ec2-13-57-28-77.us-west-1.compute.amazonaws.com',
+//   dialect: 'postgres',
+
+// });
+
+//LOCALHOST
 const sequelize = new Sequelize('sdc_database', 'michaeldoty', 'password', {
   host: 'localhost',
   dialect: 'postgres',
+
 });
 
 
@@ -18,14 +27,11 @@ const Room = sequelize.define('rooms', {
   max_night: Sequelize.INTEGER,
   ratings: Sequelize.DECIMAL(2, 1),
   num_reviews: Sequelize.INTEGER,
+  createdAt: Sequelize.DATE,
+  updatedAt: Sequelize.DATE,
 });
 
 const Booking = sequelize.define('bookings', {
-  email: Sequelize.STRING,
-  guests: Sequelize.STRING,
-  check_in: Sequelize.DATE,
-  check_out: Sequelize.DATE,
-  createdAt: Sequelize.DATE,
   roomId: {
     type: Sequelize.INTEGER,
     references: {
@@ -33,6 +39,13 @@ const Booking = sequelize.define('bookings', {
       key: 'id',
     },
   },
+  email: Sequelize.STRING,
+  guests: Sequelize.STRING,
+  check_in: Sequelize.DATE,
+  check_out: Sequelize.DATE,
+  createdAt: Sequelize.DATE,
+  id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+  updatedAt: Sequelize.DATE,
 });
 
 Room.hasMany(Booking, { foreignKey: 'roomId' });

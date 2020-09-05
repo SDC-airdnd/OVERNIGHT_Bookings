@@ -1,8 +1,10 @@
+require('newrelic');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('../db/index.js');
+
 
 
 const app = express();
@@ -23,15 +25,13 @@ const randomIntFromInterval = (min, max) => {
 
 app.get('/test', (req, res) => {
   let randoRoom = randomIntFromInterval(1, 10000000);
-  console.log(randoRoom);
   db.Room.findAll({
     where: {
       id: randoRoom,
     },
   })
     .then((result) => {
-      console.log(result);
-      res.send(result[0].dataValues);
+      res.sendStatus(200);
     })
     .catch(() => {
       res.sendStatus(500);
