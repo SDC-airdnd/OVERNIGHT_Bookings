@@ -88,41 +88,77 @@ function generateRandomBooking() {
     check_out: randomCheckInOutDates.check_out,
     createdAt: moment(randomCheckInOutDates.check_in).subtract(randomIntFromInterval(0, 30), 'days').utc().format(),
   };
-  return booking;
+  return JSON.stringify(booking);
 }
 
-function write10M(writer, encoding, callback) {
+function createBookingData(num) {
+  const roomId = randomIntFromInterval(1, 10000000);
 
-  let i = 100;
-  let id = 0;
-  function write() {
-    let ok = true;
-    do {
-      i -= 1;
-      id += 1;
+  const randomCheckInOutDates = randomCheckInOutOnRoom(roomId);
 
-      const data = JSON.stringify(generateRandomBooking())
-
-      if (i === 0) {
-        writer.write(data, encoding, callback);
-      } else {
-        // See if we should continue, or wait.
-        // Don't pass the callback, because we're not done yet.
-        ok = writer.write(data, encoding);
-      }
-    } while (i > 0 && ok);
-    if (i > 0) {
-      // Had to stop early!
-      // Write some more once it drains.
-      writer.once('drain', write);
-    }
+  if (randomCheckInOutDates === null) {
+    return null;
   }
-  write();
+
+  const booking = {
+    roomId,
+    email: faker.internet.email(),
+    guests: JSON.stringify({
+      adults: randomIntFromInterval(1, 5),
+      children: randomIntFromInterval(0, 5),
+      infants: randomIntFromInterval(0, 5),
+    }),
+    check_in: randomCheckInOutDates.check_in,
+    check_out: randomCheckInOutDates.check_out,
+    createdAt: moment(randomCheckInOutDates.check_in).subtract(randomIntFromInterval(0, 30), 'days').utc().format(),
+  };
+
+  console.log(booking);
+
+  db.Booking.create(booking)
+    .then(() => {
+      // eslint-disable-next-line no-console
+      console.log('success for booking');
+    })
+    .catch((err) => {
+      throw err;
+    });
 }
 
-write10M(writeBookings, 'utf-8', () => {
-  writeBookings.end();
-});
+createBookingData(1);
+
+// function write10M(writer, encoding, callback) {
+
+//   let i = 100;
+//   let id = 0;
+//   function write() {
+//     let ok = true;
+//     do {
+//       i -= 1;
+//       id += 1;
+
+//       const data = JSON.stringify(generateRandomBooking())
+
+//       if (i === 0) {
+//         writer.write(data, encoding, callback);
+//       } else {
+//         // See if we should continue, or wait.
+//         // Don't pass the callback, because we're not done yet.
+//         ok = writer.write(data, encoding);
+//       }
+//     } while (i > 0 && ok);
+//     if (i > 0) {
+//       // Had to stop early!
+//       // Write some more once it drains.
+//       writer.once('drain', write);
+//     }
+//   }
+//   write();
+// }
+
+// write10M(writeBookings, 'utf-8', () => {
+//   writeBookings.end();
+// });
 
 
 
