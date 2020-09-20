@@ -2,6 +2,4 @@
 
 ### Features
 
-- Image Carousel
-- Property Description
-- Property Stats
+- Room and Guest Booking Service Module
